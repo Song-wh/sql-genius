@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Genius - AI 기반 SQL 쿼리 생성기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">SQL Genius</span>
+            </div>
+
+            <nav class="nav">
+                <button class="nav-item active" data-tab="generate">
+                    <span class="nav-icon">✨</span>
+                    <span>쿼리 생성</span>
+                </button>
+                <button class="nav-item" data-tab="validate">
+                    <span class="nav-icon">🔍</span>
+                    <span>쿼리 검증</span>
+                </button>
+                <button class="nav-item" data-tab="optimize">
+                    <span class="nav-icon">🚀</span>
+                    <span>쿼리 최적화</span>
+                </button>
+                <button class="nav-item" data-tab="schema">
+                    <span class="nav-icon">📊</span>
+                    <span>스키마 관리</span>
+                </button>
+                <button class="nav-item" data-tab="connection">
+                    <span class="nav-icon">🔌</span>
+                    <span>DB 연결</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status" id="status">
+                    <div class="status-dot"></div>
+                    <span>연결 대기 중</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main">
+            <!-- 쿼리 생성 탭 -->
+            <section class="tab-content active" id="tab-generate">
+                <div class="page-header">
+                    <h1>AI 쿼리 생성</h1>
+                    <p>자연어로 SQL 쿼리를 생성하세요</p>
+                </div>
+
+                <div class="generator-container">
+                    <div class="input-section">
+                        <div class="query-type-selector">
+                            <button class="type-btn active" data-type="SELECT">SELECT</button>
+                            <button class="type-btn" data-type="INSERT">INSERT</button>
+                            <button class="type-btn" data-type="UPDATE">UPDATE</button>
+                            <button class="type-btn" data-type="DELETE">DELETE</button>
+                            <button class="type-btn" data-type="ALTER">ALTER</button>
+                            <button class="type-btn" data-type="CREATE">CREATE</button>
+                        </div>
+
+                        <div class="prompt-container">
+                            <textarea 
+                                id="prompt" 
+                                placeholder="예: 최근 30일 동안 주문량이 가장 많은 상위 10개 제품을 조회해줘"
+                                rows="4"
+                            ></textarea>
+                            <button class="generate-btn" id="generateBtn">
+                                <span class="btn-icon">✨</span>
+                                <span>생성하기</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="result-section" id="resultSection">
+                        <div class="result-placeholder">
+                            <div class="placeholder-icon">💡</div>
+                            <p>위에서 원하는 쿼리를 자연어로 입력하세요</p>
+                            <p class="hint">먼저 스키마를 로드하거나 DB에 연결해야 합니다</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 쿼리 검증 탭 -->
+            <section class="tab-content" id="tab-validate">
+                <div class="page-header">
+                    <h1>쿼리 검증 & 분석</h1>
+                    <p>쿼리를 분석하고 성능을 평가하세요</p>
+                </div>
+
+                <div class="validate-container">
+                    <div class="input-section">
+                        <textarea 
+                            id="validateQuery" 
+                            placeholder="검증할 SQL 쿼리를 입력하세요...
+
+예: SELECT * FROM orders WHERE user_id = 1"
+                            rows="8"
+                        ></textarea>
+                        <button class="generate-btn" id="validateBtn">
+                            <span class="btn-icon">🔍</span>
+                            <span>검증하기</span>
+                        </button>
+                    </div>
+
+                    <div class="result-section" id="validateResultSection">
+                        <div class="result-placeholder">
+                            <div class="placeholder-icon">🔍</div>
+                            <p>쿼리를 입력하면 성능 분석 결과를 보여드립니다</p>
+                            <p class="hint">인덱스 활용도, 문제점, 최적화 제안 등을 확인할 수 있습니다</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 쿼리 최적화 탭 -->
+            <section class="tab-content" id="tab-optimize">
+                <div class="page-header">
+                    <h1>쿼리 최적화</h1>
+                    <p>기존 쿼리를 더 빠르게 최적화하세요</p>
+                </div>
+
+                <div class="optimize-container">
+                    <div class="input-section">
+                        <textarea 
+                            id="optimizeQuery" 
+                            placeholder="최적화할 SQL 쿼리를 입력하세요..."
+                            rows="8"
+                        ></textarea>
+                        <button class="generate-btn" id="optimizeBtn">
+                            <span class="btn-icon">🚀</span>
+                            <span>최적화</span>
+                        </button>
+                    </div>
+
+                    <div class="result-section" id="optimizeResultSection">
+                        <div class="result-placeholder">
+                            <div class="placeholder-icon">⚡</div>
+                            <p>SQL 쿼리를 입력하면 최적화된 버전을 제안합니다</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 스키마 관리 탭 -->
+            <section class="tab-content" id="tab-schema">
+                <div class="page-header">
+                    <h1>스키마 관리</h1>
+                    <p>DDL 또는 JSON으로 스키마를 로드하세요</p>
+                </div>
+
+                <div class="schema-container">
+                    <div class="schema-input">
+                        <div class="schema-tabs">
+                            <button class="schema-tab active" data-schema-type="ddl">DDL 입력</button>
+                            <button class="schema-tab" data-schema-type="json">JSON 입력</button>
+                        </div>
+
+                        <div class="db-type-selector">
+                            <label>DB 타입:</label>
+                            <select id="schemaDbType">
+                                <option value="mysql">MySQL</option>
+                                <option value="postgresql">PostgreSQL</option>
+                                <option value="oracle">Oracle</option>
+                                <option value="sqlserver">SQL Server</option>
+                            </select>
+                        </div>
+
+                        <textarea 
+                            id="schemaInput" 
+                            placeholder="CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    total DECIMAL(10,2),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);"
+                            rows="15"
+                        ></textarea>
+
+                        <div class="schema-actions">
+                            <button class="generate-btn" id="parseSchemaBtn">
+                                <span class="btn-icon">📥</span>
+                                <span>스키마 로드</span>
+                            </button>
+                            <button class="save-btn" id="saveSchemaBtn">
+                                <span class="btn-icon">💾</span>
+                                <span>저장</span>
+                            </button>
+                            <button class="load-btn" id="loadSchemaBtn">
+                                <span class="btn-icon">📂</span>
+                                <span>불러오기</span>
+                            </button>
+                            <input type="file" id="schemaFileInput" accept=".json" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="schema-view" id="schemaView">
+                        <div class="result-placeholder">
+                            <div class="placeholder-icon">📋</div>
+                            <p>스키마를 로드하면 여기에 표시됩니다</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DB 연결 탭 -->
+            <section class="tab-content" id="tab-connection">
+                <div class="page-header">
+                    <h1>데이터베이스 연결</h1>
+                    <p>직접 DB에 연결하여 스키마를 자동으로 추출하세요</p>
+                </div>
+
+                <div class="connection-container">
+                    <form class="connection-form" id="connectionForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>DB 타입</label>
+                                <select id="dbType" required>
+                                    <option value="mysql">MySQL</option>
+                                    <option value="postgresql">PostgreSQL</option>
+                                    <option value="oracle">Oracle</option>
+                                    <option value="sqlserver">SQL Server</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>호스트</label>
+                                <input type="text" id="dbHost" value="localhost" required>
+                            </div>
+                            <div class="form-group">
+                                <label>포트</label>
+                                <input type="number" id="dbPort" value="3306" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>사용자</label>
+                                <input type="text" id="dbUser" required>
+                            </div>
+                            <div class="form-group">
+                                <label>비밀번호</label>
+                                <input type="password" id="dbPassword">
+                            </div>
+                            <div class="form-group">
+                                <label>데이터베이스</label>
+                                <input type="text" id="dbName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="connect-btn">
+                                <span>🔌</span> 연결
+                            </button>
+                            <button type="button" class="disconnect-btn" id="disconnectBtn" disabled>
+                                <span>🔓</span> 연결 해제
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="connection-status" id="connectionStatus">
+                        <div class="result-placeholder">
+                            <div class="placeholder-icon">🔌</div>
+                            <p>DB 연결 정보를 입력하고 연결하세요</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

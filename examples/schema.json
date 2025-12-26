@@ -1,0 +1,127 @@
+{
+  "database": "ecommerce",
+  "db_type": "mysql",
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true, "nullable": false},
+        {"name": "email", "type": "VARCHAR(255)", "is_unique": true, "nullable": false},
+        {"name": "name", "type": "VARCHAR(100)", "nullable": false},
+        {"name": "password_hash", "type": "VARCHAR(255)", "nullable": false},
+        {"name": "phone", "type": "VARCHAR(20)", "nullable": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "nullable": true},
+        {"name": "is_active", "type": "TINYINT(1)", "default": "1"}
+      ],
+      "primary_key": ["id"],
+      "indexes": [
+        {"name": "idx_email", "columns": ["email"], "is_unique": true, "type": "BTREE"},
+        {"name": "idx_created_at", "columns": ["created_at"], "type": "BTREE"}
+      ]
+    },
+    {
+      "name": "categories",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true},
+        {"name": "name", "type": "VARCHAR(100)", "nullable": false},
+        {"name": "parent_id", "type": "INT", "is_fk": true, "nullable": true},
+        {"name": "description", "type": "TEXT", "nullable": true},
+        {"name": "sort_order", "type": "INT", "default": "0"}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"name": "fk_category_parent", "column": "parent_id", "ref_table": "categories", "ref_column": "id"}
+      ]
+    },
+    {
+      "name": "products",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true},
+        {"name": "category_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "name", "type": "VARCHAR(200)", "nullable": false},
+        {"name": "description", "type": "TEXT", "nullable": true},
+        {"name": "price", "type": "DECIMAL(10,2)", "nullable": false},
+        {"name": "stock", "type": "INT", "default": "0"},
+        {"name": "sku", "type": "VARCHAR(50)", "is_unique": true},
+        {"name": "is_active", "type": "TINYINT(1)", "default": "1"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"name": "fk_product_category", "column": "category_id", "ref_table": "categories", "ref_column": "id"}
+      ],
+      "indexes": [
+        {"name": "idx_category", "columns": ["category_id"], "type": "BTREE"},
+        {"name": "idx_sku", "columns": ["sku"], "is_unique": true, "type": "BTREE"},
+        {"name": "idx_price", "columns": ["price"], "type": "BTREE"}
+      ]
+    },
+    {
+      "name": "orders",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true},
+        {"name": "user_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "order_number", "type": "VARCHAR(50)", "is_unique": true},
+        {"name": "status", "type": "ENUM('pending','confirmed','shipped','delivered','cancelled')", "default": "'pending'"},
+        {"name": "total_amount", "type": "DECIMAL(12,2)", "nullable": false},
+        {"name": "shipping_address", "type": "TEXT", "nullable": true},
+        {"name": "notes", "type": "TEXT", "nullable": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "nullable": true}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"name": "fk_order_user", "column": "user_id", "ref_table": "users", "ref_column": "id"}
+      ],
+      "indexes": [
+        {"name": "idx_user", "columns": ["user_id"], "type": "BTREE"},
+        {"name": "idx_status", "columns": ["status"], "type": "BTREE"},
+        {"name": "idx_created_at", "columns": ["created_at"], "type": "BTREE"}
+      ]
+    },
+    {
+      "name": "order_items",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true},
+        {"name": "order_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "product_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "quantity", "type": "INT", "nullable": false},
+        {"name": "unit_price", "type": "DECIMAL(10,2)", "nullable": false},
+        {"name": "subtotal", "type": "DECIMAL(12,2)", "nullable": false}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"name": "fk_item_order", "column": "order_id", "ref_table": "orders", "ref_column": "id"},
+        {"name": "fk_item_product", "column": "product_id", "ref_table": "products", "ref_column": "id"}
+      ],
+      "indexes": [
+        {"name": "idx_order", "columns": ["order_id"], "type": "BTREE"},
+        {"name": "idx_product", "columns": ["product_id"], "type": "BTREE"}
+      ]
+    },
+    {
+      "name": "reviews",
+      "columns": [
+        {"name": "id", "type": "INT", "is_pk": true, "is_auto_incr": true},
+        {"name": "product_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "user_id", "type": "INT", "is_fk": true, "nullable": false},
+        {"name": "rating", "type": "TINYINT", "nullable": false, "comment": "1-5"},
+        {"name": "title", "type": "VARCHAR(200)", "nullable": true},
+        {"name": "content", "type": "TEXT", "nullable": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "primary_key": ["id"],
+      "foreign_keys": [
+        {"name": "fk_review_product", "column": "product_id", "ref_table": "products", "ref_column": "id"},
+        {"name": "fk_review_user", "column": "user_id", "ref_table": "users", "ref_column": "id"}
+      ],
+      "indexes": [
+        {"name": "idx_product", "columns": ["product_id"], "type": "BTREE"},
+        {"name": "idx_user", "columns": ["user_id"], "type": "BTREE"},
+        {"name": "idx_rating", "columns": ["rating"], "type": "BTREE"}
+      ]
+    }
+  ]
+}
+

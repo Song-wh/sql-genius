@@ -333,4 +333,3 @@ func (m *MySQLConnector) Explain(ctx context.Context, query string) (string, err
 
 	return result.String(), nil
 }
-

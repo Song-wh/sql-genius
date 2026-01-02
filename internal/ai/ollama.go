@@ -110,7 +110,7 @@ func (o *OllamaProvider) generate(ctx context.Context, prompt string) (string, e
 
 func (o *OllamaProvider) GenerateQuery(ctx context.Context, req *models.QueryRequest) (*models.QueryResponse, error) {
 	prompt := buildQueryPrompt(req)
-	
+
 	start := time.Now()
 	response, err := o.generate(ctx, prompt)
 	if err != nil {
@@ -130,7 +130,7 @@ func (o *OllamaProvider) GenerateQuery(ctx context.Context, req *models.QueryReq
 
 func (o *OllamaProvider) OptimizeQuery(ctx context.Context, query string, schema *models.Schema) (*models.QueryResponse, error) {
 	prompt := buildOptimizePrompt(query, schema)
-	
+
 	start := time.Now()
 	response, err := o.generate(ctx, prompt)
 	if err != nil {
@@ -161,7 +161,7 @@ func (o *OllamaProvider) ExplainQuery(ctx context.Context, query string) (string
 // buildQueryPrompt 쿼리 생성 프롬프트 구성
 func buildQueryPrompt(req *models.QueryRequest) string {
 	schemaStr := formatSchema(&req.Schema)
-	
+
 	prompt := fmt.Sprintf(`당신은 SQL 전문가입니다. 주어진 데이터베이스 스키마를 분석하고, 사용자 요청에 맞는 최적화된 SQL 쿼리를 생성해주세요.
 
 ## 데이터베이스 타입: %s
@@ -198,7 +198,7 @@ SQL:
 // buildOptimizePrompt 최적화 프롬프트 구성
 func buildOptimizePrompt(query string, schema *models.Schema) string {
 	schemaStr := formatSchema(schema)
-	
+
 	return fmt.Sprintf(`당신은 SQL 최적화 전문가입니다. 다음 쿼리를 분석하고 더 빠르게 실행될 수 있도록 최적화해주세요.
 
 ## 원본 쿼리:
@@ -223,7 +223,7 @@ SQL:
 // formatSchema 스키마를 문자열로 변환
 func formatSchema(schema *models.Schema) string {
 	var sb strings.Builder
-	
+
 	for _, table := range schema.Tables {
 		sb.WriteString(fmt.Sprintf("테이블: %s\n", table.Name))
 		sb.WriteString("컬럼:\n")
@@ -240,14 +240,14 @@ func formatSchema(schema *models.Schema) string {
 			}
 			sb.WriteString(fmt.Sprintf("  - %s %s%s\n", col.Name, col.Type, flags))
 		}
-		
+
 		if len(table.Indexes) > 0 {
 			sb.WriteString("인덱스:\n")
 			for _, idx := range table.Indexes {
 				sb.WriteString(fmt.Sprintf("  - %s (%s)\n", idx.Name, strings.Join(idx.Columns, ", ")))
 			}
 		}
-		
+
 		if len(table.ForeignKeys) > 0 {
 			sb.WriteString("외래키:\n")
 			for _, fk := range table.ForeignKeys {
@@ -256,21 +256,21 @@ func formatSchema(schema *models.Schema) string {
 		}
 		sb.WriteString("\n")
 	}
-	
+
 	return sb.String()
 }
 
 // parseQueryResponse AI 응답 파싱
 func parseQueryResponse(response string) (query, explanation string, tips []string) {
 	lines := strings.Split(response, "\n")
-	
+
 	var section string
 	var queryLines, explainLines []string
 	tips = []string{}
-	
+
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
-		
+
 		if strings.HasPrefix(trimmed, "SQL:") {
 			section = "sql"
 			continue
@@ -281,7 +281,7 @@ func parseQueryResponse(response string) (query, explanation string, tips []stri
 			section = "tips"
 			continue
 		}
-		
+
 		switch section {
 		case "sql":
 			if trimmed != "" && trimmed != "```sql" && trimmed != "```" {
@@ -299,22 +299,22 @@ func parseQueryResponse(response string) (query, explanation string, tips []stri
 			}
 		}
 	}
-	
+
 	query = strings.TrimSpace(strings.Join(queryLines, "\n"))
 	explanation = strings.Join(explainLines, " ")
-	
+
 	// SQL 블록 마커 제거
 	query = strings.TrimPrefix(query, "```sql")
 	query = strings.TrimPrefix(query, "```")
 	query = strings.TrimSuffix(query, "```")
 	query = strings.TrimSpace(query)
-	
+
 	return
 }
 
 func (o *OllamaProvider) ValidateQuery(ctx context.Context, query string, schema *models.Schema) (*models.QueryValidation, error) {
 	prompt := buildValidatePrompt(query, schema)
-	
+
 	start := time.Now()
 	response, err := o.generate(ctx, prompt)
 	if err != nil {
@@ -331,7 +331,7 @@ func (o *OllamaProvider) ValidateQuery(ctx context.Context, query string, schema
 // buildValidatePrompt 쿼리 검증 프롬프트 구성
 func buildValidatePrompt(query string, schema *models.Schema) string {
 	schemaStr := formatSchema(schema)
-	
+
 	return fmt.Sprintf(`당신은 SQL 성능 분석 전문가입니다. 다음 쿼리를 분석하고 성능을 평가해주세요.
 
 ## 분석할 쿼리:
@@ -392,7 +392,7 @@ func parseValidationResponse(response string, originalQuery string) *models.Quer
 
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
-		
+
 		// 섹션 감지
 		if strings.HasPrefix(trimmed, "유효성:") {
 			val := strings.TrimSpace(strings.TrimPrefix(trimmed, "유효성:"))
@@ -496,11 +496,11 @@ func parseValidationResponse(response string, originalQuery string) *models.Quer
 // parseIssue 문제점 파싱
 func parseIssue(line string) models.Issue {
 	issue := models.Issue{Type: "info"}
-	
+
 	line = strings.TrimPrefix(line, "-")
 	line = strings.TrimPrefix(line, "•")
 	line = strings.TrimSpace(line)
-	
+
 	// 타입 감지
 	if strings.Contains(line, "[error]") {
 		issue.Type = "error"
@@ -512,7 +512,7 @@ func parseIssue(line string) models.Issue {
 		issue.Type = "info"
 		line = strings.Replace(line, "[info]", "", 1)
 	}
-	
+
 	// 파이프로 분리된 정보 파싱
 	parts := strings.Split(line, "|")
 	if len(parts) >= 1 {
@@ -526,7 +526,6 @@ func parseIssue(line string) models.Issue {
 		sug := strings.TrimPrefix(parts[2], "해결:")
 		issue.Suggestion = strings.TrimSpace(sug)
 	}
-	
+
 	return issue
 }
-
